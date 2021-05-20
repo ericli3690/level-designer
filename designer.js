@@ -1,11 +1,3 @@
-//encyclopaedia
-//add images instead of colours
-//add orientation marker
-//loading, right click
-//edit the tooutput
-//show names on hover
-//erasing should save the current brush
-
 document.getElementById('inputX').value = 20;
 document.getElementById('inputY').value = 20;
 
