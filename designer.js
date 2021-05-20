@@ -5,9 +5,9 @@ var maxX = 0;
 var maxY = 0;
 var mouseIsDown = false;
 var usedButton = 0;
-var toOutput = 0;
+var toOutput = 1;
 var output = [];
-var currentBrush = '';
+var currentBrush = 'yellow';
 var ctx = document.getElementById('canvas').getContext('2d');
 
 //creates each block; this allows them to each have their own event listener
@@ -75,7 +75,7 @@ function createCanvas() {
     maxY = document.getElementById('inputY').value;
     document.getElementById('canvas').width = maxX * 20;
     document.getElementById('canvas').height = maxY * 20;
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = 'gainsboro';
     output.push(maxX);
     output.push(maxY);
     for (var i = 0; i < maxY; i++) {
@@ -87,23 +87,22 @@ function createCanvas() {
         output.push(0);
       }
     }
-    output.push('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
+    output.push('|END OF STRING|');
   } else {
     var stringToLoad = document.getElementById('loadString').value;
     output = stringToLoad.split(",");
-    output.push('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
+    output.push('|END OF STRING|');
     maxX = output[0];
     maxY = output[1];
     document.getElementById('canvas').width = maxX * 20;
     document.getElementById('canvas').height = maxY * 20;
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = 'gainsboro';
 
     for (var i = 0; i < maxY; i++) {
       //moving down a row
       for (var j = 0; j < maxX; j++) {
         //moving over a column
         //x, y, width, height
-        ctx.strokeStyle = 'black';
         ctx.strokeRect(j * 20, i * 20, 20, 20);
         if (output[i * maxX + j + 2] != 0) {
           ctx.fillStyle = colours[parseInt(output[i * maxX + j + 2], 10) - 1];
@@ -132,7 +131,7 @@ function mouseUp() {
 function objectMousedOver() {
   if (mouseIsDown == true) {
     var mouseX = event.clientX  - 10 + pageXOffset;
-    var mouseY = event.clientY - 265 + pageYOffset;
+    var mouseY = event.clientY - 110 + pageYOffset;
     var targetX = Math.floor(mouseX / 20);
     var targetY = Math.floor(mouseY / 20);
     if (usedButton == 2) {
