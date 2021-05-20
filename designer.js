@@ -8,6 +8,7 @@ var usedButton = 0;
 var toOutput = 1;
 var output = [];
 var currentBrush = 'yellow';
+var fillStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
 //creates each block; this allows them to each have their own event listener
@@ -118,10 +119,55 @@ function createCanvas() {
   }
 }
 
+var fill1 = 0;
+var fill2 = 0;
+var fill3 = 0;
+var fill4 = 0;
+
+function fill() {
+  if (fillStatus == 0) {
+    fillStatus = 1;
+  }
+}
+
 function mouseDown() {
-  mouseIsDown = true;
-  usedButton = event.button;
-  objectMousedOver();
+  if (fillStatus == 0) {
+    //filling is not happening
+    mouseIsDown = true;
+    usedButton = event.button;
+    objectMousedOver();
+  } else if (fillStatus == 1) {
+    //fill, first one clicked, save the first block and set the colour to fill with
+    usedButton = event.button;
+    var mouseX = event.clientX - 10 + pageXOffset;
+    var mouseY = event.clientY - 110 + pageYOffset;
+    fill1 = Math.floor(mouseX / 20);
+    fill2 = Math.floor(mouseY / 20);
+    if (usedButton == 2) {
+      ctx.fillStyle = 'white';
+      toOutput = 0;
+    } else {
+      ctx.fillStyle = currentBrush;
+      toOutput = colours.indexOf(currentBrush) + 1;
+    }
+    fillStatus = 2;
+  } else if (fillStatus == 2) {
+    //fill, second one clicked, save it
+    usedButton = event.button;
+    var mouseX = event.clientX - 10 + pageXOffset;
+    var mouseY = event.clientY - 110 + pageYOffset;
+    fill3 = Math.floor(mouseX / 20);
+    fill4 = Math.floor(mouseY / 20);
+    //the math and actual filling
+    for (var i = 0; i < (fill4 - fill2 + 1); i++) {
+      for (var j = 0; j < (fill3 - fill1 + 1); j++) {
+        ctx.fillRect((fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18);
+        output[(fill2 + i) * maxX + (fill1 + j) + 2] = toOutput;
+      }
+    }
+    //set fill back to 0
+    fillStatus = 0;
+  }
 }
 
 function mouseUp() {
@@ -130,7 +176,7 @@ function mouseUp() {
 
 function objectMousedOver() {
   if (mouseIsDown == true) {
-    var mouseX = event.clientX  - 10 + pageXOffset;
+    var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - 110 + pageYOffset;
     var targetX = Math.floor(mouseX / 20);
     var targetY = Math.floor(mouseY / 20);
