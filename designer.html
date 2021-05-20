@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./designer.css" />
+    <title>Level Designer</title>
+  </head>
+  <body>
+
+    <p>InputX</p>
+    <input type="number" name="x" title="InputX" id="inputX"></input>
+
+    <p>InputY</p>
+    <input type="number" name="y" title="InputY" id="inputY"></input>
+
+    <p>Load Level</p>
+    <input type="text" name="load" title="loadString" id="loadString"></input>
+
+    <button id="initCanvas" onclick="createCanvas()">Create Canvas</button><br><br>
+
+    <div id="div1">
+    </div>
+
+    <canvas oncontextmenu="return false;" width="0px" height="0px" id="canvas"></canvas><br><br>
+
+    <button id="saveCanvas" onclick="saveCanvas()">Save Canvas</button><br><br>
+
+    <p id="output">OUTPUT</p>
+
+    <script src="./designer.js"></script>
+  </body>
+</html>
