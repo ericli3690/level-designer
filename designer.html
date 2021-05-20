@@ -9,31 +9,38 @@
 
     <h1 id="pageTitle">DESIGNER - GREY MATTER</h1>
 
-    <div id="div1">
-    </div>
+    <div id="div0">
     <canvas oncontextmenu="return false;" width="0px" height="0px" id="canvas"></canvas><br><br>
-    <button onclick="fill()" id="fill">Fill</button><br><br>
+    <div id="div01">
+    </div>
+    <p id="blockInstructions">(Palette) Hover over a colour for the block it represents</p>
+    <p id="functionsTitle">Functions:</p>
+    <button onclick="fill()" id="fill">Fill (F)</button><p id="fillInstructions">Instructions: Press button, then press top left corner of selection, then press bottom right corner of selection</p>
+    </div>
 
+    <div id="div1">
     <h3 id="inputTitle">To Create: Input X and Y Tiles</h3>
     <p>InputX</p>
     <input type="number" name="x" title="InputX" id="inputX"></input>
     <p>InputY</p>
-    <input type="number" name="y" title="InputY" id="inputY"></input><br><br><br><br>
+    <input type="number" name="y" title="InputY" id="inputY"></input><br>
+    </div>
 
-
+    <div id="div2">
     <h3 id="loadTitle">To Load Existing: Input String</h3>
     <p>Load Level</p>
-    <input type="text" name="load" title="loadString" id="loadString"></input><br><br><br><br>
+    <input type="text" name="load" title="loadString" id="loadString"></input><br>
+    <button id="initCanvas" onclick="createCanvas()">Create / Load Canvas</button><br><br><br><br>
+    </div>
 
+    <div id="div3">
+    <button id="saveCanvas" onclick="saveCanvas()">Save Current Canvas</button><br>
 
-    <h3 id="createTitle">CREATE & SAVE</h3>
-    <button id="initCanvas" onclick="createCanvas()">Create Canvas With the Above Settings</button><br><br>
-    <button id="saveCanvas" onclick="saveCanvas()">Save Current Canvas</button><br><br>
-
-    <div id="div2" width="200px">
-    <p id="output">[OUTPUT HERE] Press Save to View and Copy Output</p>
-    <p id="warning">Note: Please reload the page before creating a new canvas.</p>
-  </div>
+    <div id="div10" width="200px">
+    <p id="output">[OUTPUT HERE] Press save to view and copy canvas output.</p>
+    <p id="warning"><strong>Note: Please reload the page before creating a new canvas.</strong></p>
+    </div>
+    </div>
 
     <script src="./designer.js"></script>
   </body>

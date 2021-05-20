@@ -11,6 +11,42 @@ canvas {
   height: 20px;
 }
 
+#div01 {
+  position: relative;
+  bottom: 10px;
+}
+
 #div2 {
+  position: relative;
+  bottom: 185px;
+  left: 300px;
+  width: 300px;
+}
+
+#div3 {
+  position: relative;
+}
+
+#div10 {
   overflow-wrap: break-word;
+}
+
+#initCanvas {
+  position: relative;
+  top: 15px;
+}
+
+#fillInstructions, #inputX, #inputY, #loadString {
+  position: relative;
+  bottom: 35px;
+  left: 90px;
+}
+
+#fillInstructions {
+  width: 800px;
+}
+
+#blockInstructions {
+  position: relative;
+  bottom: 20px;
 }

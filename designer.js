@@ -1,6 +1,10 @@
+//simple values for testing, making canvas invisible, saving invisible
 document.getElementById('inputX').value = 20;
 document.getElementById('inputY').value = 20;
+document.getElementById('div0').style.display = 'none';
+document.getElementById('div3').style.display = 'none';
 
+var yOffset = 80; //the amount of pixels between the canvas and the top
 var maxX = 0;
 var maxY = 0;
 var mouseIsDown = false;
@@ -39,7 +43,7 @@ function createBlocks() {
   for (var i = 0; i < blocks.length; i++) {
     //create a new canvas, and peg it to div2
     var newButton = document.createElement('canvas');
-    var find = document.getElementById('div1');
+    var find = document.getElementById('div01');
     find.appendChild(newButton);
 
     //give the canvas an id
@@ -117,6 +121,11 @@ function createCanvas() {
       }
     }
   }
+  //canvas and save now viewable, create not viewable
+  document.getElementById('div0').style.display = 'block';
+  document.getElementById('div3').style.display = 'block';
+  document.getElementById('div1').style.display = 'none';
+  document.getElementById('div2').style.display = 'none';
 }
 
 var fill1 = 0;
@@ -125,8 +134,9 @@ var fill3 = 0;
 var fill4 = 0;
 
 function fill() {
-  if (fillStatus == 0) {
+  if (fillStatus == 0 && output.length > 0) {
     fillStatus = 1;
+    document.getElementById('fill').innerHTML = 'x, y - x, y';
   }
 }
 
@@ -140,7 +150,7 @@ function mouseDown() {
     //fill, first one clicked, save the first block and set the colour to fill with
     usedButton = event.button;
     var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - 110 + pageYOffset;
+    var mouseY = event.clientY - yOffset + pageYOffset;
     fill1 = Math.floor(mouseX / 20);
     fill2 = Math.floor(mouseY / 20);
     if (usedButton == 2) {
@@ -151,22 +161,26 @@ function mouseDown() {
       toOutput = colours.indexOf(currentBrush) + 1;
     }
     fillStatus = 2;
+    document.getElementById('fill').innerHTML = fill1 + ', ' + fill2 + ' - x, y';
   } else if (fillStatus == 2) {
     //fill, second one clicked, save it
     usedButton = event.button;
     var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - 110 + pageYOffset;
+    var mouseY = event.clientY - yOffset + pageYOffset;
     fill3 = Math.floor(mouseX / 20);
     fill4 = Math.floor(mouseY / 20);
     //the math and actual filling
+    //the plus 1 is because i < a bigger number than the number to stop at; counting from 0 reasons
     for (var i = 0; i < (fill4 - fill2 + 1); i++) {
       for (var j = 0; j < (fill3 - fill1 + 1); j++) {
+        //filling everything, but starting from the initial selection
         ctx.fillRect((fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18);
         output[(fill2 + i) * maxX + (fill1 + j) + 2] = toOutput;
       }
     }
     //set fill back to 0
     fillStatus = 0;
+    document.getElementById('fill').innerHTML = 'Fill';
   }
 }
 
@@ -177,7 +191,7 @@ function mouseUp() {
 function objectMousedOver() {
   if (mouseIsDown == true) {
     var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - 110 + pageYOffset;
+    var mouseY = event.clientY - yOffset + pageYOffset;
     var targetX = Math.floor(mouseX / 20);
     var targetY = Math.floor(mouseY / 20);
     if (usedButton == 2) {
@@ -192,10 +206,18 @@ function objectMousedOver() {
   }
 }
 
+function keyPressed(event) {
+  if (event.keyCode == 70) {
+    //press F to fill
+    fill();
+  }
+}
+
 function saveCanvas() {
   document.getElementById('output').innerHTML = output.toString();
 }
 
+document.addEventListener('keydown', keyPressed);
 document.getElementById('canvas').onmousedown = mouseDown;
 document.getElementById('canvas').onmousemove = objectMousedOver;
 document.getElementById('canvas').onmouseup = mouseUp;
