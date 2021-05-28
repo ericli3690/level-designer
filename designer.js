@@ -180,7 +180,7 @@ function mouseDown() {
     }
     //set fill back to 0
     fillStatus = 0;
-    document.getElementById('fill').innerHTML = 'Fill';
+    document.getElementById('fill').innerHTML = 'Fill (F)';
   }
 }
 

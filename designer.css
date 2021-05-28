@@ -11,6 +11,11 @@ canvas {
   height: 20px;
 }
 
+
+
+
+
+
 #div01 {
   position: relative;
   bottom: 10px;
@@ -31,12 +36,46 @@ canvas {
   overflow-wrap: break-word;
 }
 
+
+
+
+
+
 #initCanvas {
   position: relative;
   top: 15px;
 }
 
-#fillInstructions, #inputX, #inputY, #loadString {
+
+
+
+
+
+#fillInstructions, #copyPaste, #copyPasteInstructions {
+  position: relative;
+}
+
+#fillInstructions {
+  left: 140px;
+  bottom: 35px;
+}
+
+#copyPaste {
+  bottom: 40px;
+}
+
+#copyPasteInstructions {
+  left: 140px;
+  bottom: 75px;
+}
+
+
+
+
+
+
+
+#inputX, #inputY, #loadString {
   position: relative;
   bottom: 35px;
   left: 90px;
