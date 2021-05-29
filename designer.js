@@ -11,8 +11,9 @@ var mouseIsDown = false;
 var usedButton = 0;
 var toOutput = 1;
 var output = [];
-var currentBrush = 'yellow';
+var currentBrush = 'white';
 var fillStatus = 0;
+var copyPasteStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
 //creates each block; this allows them to each have their own event listener
@@ -32,10 +33,10 @@ class Block {
 }
 
 //the blocks
-var one, two, three, four, five, six, seven, eight, nine, ten;
-var blocks = [one, two, three, four, five, six, seven, eight, nine, ten];
-var names = ['spawn', 'win', 'overworld_material_dirt', 'overworld_material_grass', 'overworld_background', 'overworld_background_hanging_grass', 'overworld_background_hanging_grass_180', 'overworld_material_dirt_corner', 'overworld_material_dirt_corner_180', 'overworld_water'];
-var colours = ['yellow', 'black', 'purple', 'green', 'pink', 'red', 'orange', 'cyan', 'blue', 'navy'];
+var one, two, three, four, five, six, seven, eight, nine, ten, eleven;
+var blocks = [one, two, three, four, five, six, seven, eight, nine, ten, eleven];
+var names = ['void', 'spawn', 'win', 'overworld_material_dirt', 'overworld_material_grass', 'overworld_background', 'overworld_background_hanging_grass', 'overworld_background_hanging_grass_180', 'overworld_material_dirt_corner', 'overworld_material_dirt_corner_180', 'overworld_water'];
+var colours = ['white', 'yellow', 'black', 'purple', 'green', 'pink', 'red', 'orange', 'cyan', 'blue', 'navy'];
 
 //creates the blocks
 function createBlocks() {
@@ -110,11 +111,10 @@ function createCanvas() {
         //x, y, width, height
         ctx.strokeRect(j * 20, i * 20, 20, 20);
         if (output[i * maxX + j + 2] != 0) {
-          ctx.fillStyle = colours[parseInt(output[i * maxX + j + 2], 10) - 1];
+          ctx.fillStyle = colours[parseInt(output[i * maxX + j + 2], 10)];
           //i * maxx + j + 2 is the current tile of the string we are looking at
           //output[the above] is that tile
           //parseInt(the above, 10) takes the string output and turns it into a number, the 10 is for base 10
-          // the above - 1 because the numbers are off
           //colours[the above]  to get the block with that call number
           ctx.fillRect(j * 20 + 1, i * 20 + 1, 18, 18);
         }
@@ -133,19 +133,40 @@ var fill2 = 0;
 var fill3 = 0;
 var fill4 = 0;
 
+var copy1 = 0;
+var copy2 = 0;
+var copy3 = 0;
+var copy4 = 0;
+var paste1 = 0;
+var paste2 = 0;
+
+var copiedSelection = [];
+
 function fill() {
-  if (fillStatus == 0 && output.length > 0) {
+  if (fillStatus == 0 && copyPasteStatus == 0) {
     fillStatus = 1;
     document.getElementById('fill').innerHTML = 'x, y - x, y';
   }
 }
 
+function copyPaste() {
+  if (copyPasteStatus == 0 && fillStatus == 0) {
+    copyPasteStatus = 1;
+    document.getElementById('copyPaste').innerHTML = 'x, y - x, y => x, y';
+  }
+}
+
 function mouseDown() {
-  if (fillStatus == 0) {
+  if (fillStatus == 0 && copyPasteStatus == 0) {
     //filling is not happening
     mouseIsDown = true;
     usedButton = event.button;
     objectMousedOver();
+
+
+
+
+
   } else if (fillStatus == 1) {
     //fill, first one clicked, save the first block and set the colour to fill with
     usedButton = event.button;
@@ -158,7 +179,7 @@ function mouseDown() {
       toOutput = 0;
     } else {
       ctx.fillStyle = currentBrush;
-      toOutput = colours.indexOf(currentBrush) + 1;
+      toOutput = colours.indexOf(currentBrush);
     }
     fillStatus = 2;
     document.getElementById('fill').innerHTML = fill1 + ', ' + fill2 + ' - x, y';
@@ -170,7 +191,6 @@ function mouseDown() {
     fill3 = Math.floor(mouseX / 20);
     fill4 = Math.floor(mouseY / 20);
     //the math and actual filling
-    //the plus 1 is because i < a bigger number than the number to stop at; counting from 0 reasons
     for (var i = 0; i < (fill4 - fill2 + 1); i++) {
       for (var j = 0; j < (fill3 - fill1 + 1); j++) {
         //filling everything, but starting from the initial selection
@@ -181,6 +201,58 @@ function mouseDown() {
     //set fill back to 0
     fillStatus = 0;
     document.getElementById('fill').innerHTML = 'Fill (F)';
+
+
+
+
+
+  } else if (copyPasteStatus == 1) {
+    //copy paste, first one clicked, just remember it for now
+    var mouseX = event.clientX - 10 + pageXOffset;
+    var mouseY = event.clientY - yOffset + pageYOffset;
+    copy1 = Math.floor(mouseX / 20);
+    copy2 = Math.floor(mouseY / 20);
+    copyPasteStatus = 2;
+    document.getElementById('copyPaste').innerHTML = copy1 + ', ' + copy2 + ' - x, y => x, y';
+  } else if (copyPasteStatus == 2) {
+    //copy paste, second one clicked, export all the cells that were clicked to an array; the values stored are the output
+    var mouseX = event.clientX - 10 + pageXOffset;
+    var mouseY = event.clientY - yOffset + pageYOffset;
+    copy3 = Math.floor(mouseX / 20);
+    copy4 = Math.floor(mouseY / 20);
+    //grabbing the values, see the fill code above for an explanation as they are similar
+    for (var i = 0; i < (copy4 - copy2 + 1); i++) {
+      for (var j = 0; j < (copy3 - copy1 + 1); j++) {
+        //grabbing everything from the initial selection
+        copiedSelection.push(output[(copy2 + i) * maxX + (copy1 + j) + 2]);
+      }
+    }
+    copyPasteStatus = 3;
+    document.getElementById('copyPaste').innerHTML = copy1 + ', ' + copy2 + ' - ' + copy3 + ', ' + copy4 + ' => x, y';
+  } else if (copyPasteStatus == 3) {
+    //writing values everywhere: filling colours and adding to the output
+    var mouseX = event.clientX - 10 + pageXOffset;
+    var mouseY = event.clientY - yOffset + pageYOffset;
+    paste1 = Math.floor(mouseX / 20);
+    paste2 = Math.floor(mouseY / 20);
+    //the math and actual filling
+    for (var i = 0; i < (copy4 - copy2 + 1); i++) {
+      for (var j = 0; j < (copy3 - copy1 + 1); j++) {
+        //all values here count from 0, except for maxx and maxy, therefore make them count from 0
+        //if the current fill is going to be out of bounds in either x or y axis
+        if (!(paste1 + j > maxX - 1 || paste2 + i > maxY - 1)) {
+          //current row * amount of columns + current column = current tile
+          var amountOfTimesThisVariableHasBeenDeclared = i * (copy3 - copy1 + 1) + j;
+          ctx.fillStyle = colours[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]];
+          ctx.fillRect((paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18);
+          output[(paste2 + i) * maxX + (paste1 + j) + 2] = copiedSelection[amountOfTimesThisVariableHasBeenDeclared];
+        }
+      }
+    }
+    //set fill back to 0
+    copyPasteStatus = 0;
+    copiedSelection = [];
+    document.getElementById('copyPaste').innerHTML = 'Copy & Paste (C)';
   }
 }
 
@@ -199,7 +271,7 @@ function objectMousedOver() {
       toOutput = 0;
     } else {
       ctx.fillStyle = currentBrush;
-      toOutput = colours.indexOf(currentBrush) + 1;
+      toOutput = colours.indexOf(currentBrush);
     }
     ctx.fillRect(targetX * 20 + 1, targetY * 20 + 1, 18, 18);
     output[targetY * maxX + targetX + 2] = toOutput;
@@ -210,6 +282,10 @@ function keyPressed(event) {
   if (event.keyCode == 70) {
     //press F to fill
     fill();
+  }
+  if (event.keyCode == 67) {
+    //press c to copypaste
+    copyPaste();
   }
 }
 
