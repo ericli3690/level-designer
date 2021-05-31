@@ -3,6 +3,10 @@ html {
 }
 
 canvas {
+  border: 3px solid white;
+}
+
+#canvas {
   border: 3px solid black;
 }
 
@@ -51,7 +55,7 @@ canvas {
 
 
 
-#fillInstructions, #copyPaste, #copyPasteInstructions {
+#fillInstructions, #copy, #copyInstructions, #paste, #pasteInstructions {
   position: relative;
 }
 
@@ -60,13 +64,22 @@ canvas {
   bottom: 35px;
 }
 
-#copyPaste {
+#copy {
   bottom: 40px;
 }
 
-#copyPasteInstructions {
+#copyInstructions {
   left: 140px;
   bottom: 75px;
+}
+
+#paste {
+  bottom: 80px;
+}
+
+#pasteInstructions {
+  bottom: 115px;
+  left: 140px;
 }
 
 

@@ -4,7 +4,7 @@ document.getElementById('inputY').value = 20;
 document.getElementById('div0').style.display = 'none';
 document.getElementById('div3').style.display = 'none';
 
-var yOffset = 80; //the amount of pixels between the canvas and the top
+var yOffset = 85; //the amount of pixels between the canvas and the top
 var maxX = 0;
 var maxY = 0;
 var mouseIsDown = false;
@@ -12,8 +12,10 @@ var usedButton = 0;
 var toOutput = 1;
 var output = [];
 var currentBrush = 'white';
+var secondaryBrush = 'white';
 var fillStatus = 0;
-var copyPasteStatus = 0;
+var copyStatus = 0;
+var pasteStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
 //creates each block; this allows them to each have their own event listener
@@ -22,12 +24,24 @@ class Block {
     this.name = name;
   }
   addListener() {
-    document.getElementById(this.name).addEventListener("click", function() {
+    document.getElementById(this.name).addEventListener("mouseup", function() {
       var classes = [];
       //grab the two classes, and split them into an array, with the first item being the colour
       classes = this.className.split(" ");
       //set it as the brush!
-      currentBrush = classes[0];
+      if (event.button == 2) {
+        //is there a canvas that has a border that matches the current brush? if so, set it to white
+        document.getElementById(names[colours.indexOf(secondaryBrush)]).style.border = '3px solid white';
+        //set it as right click brush
+        secondaryBrush = classes[0];
+        //"this" refers to the html element
+        this.style.border = '3px solid grey';
+      } else {
+        document.getElementById(names[colours.indexOf(currentBrush)]).style.border = '3px solid white';
+        //set it as left click brush
+        currentBrush = classes[0];
+        this.style.border = '3px solid black';
+      }
     })
   }
 }
@@ -60,6 +74,11 @@ function createBlocks() {
     var title = document.createAttribute('title');
     title.value = names[i];
     newButton.setAttributeNode(title);
+
+    //disable the right click menu when it is clicked
+    var oncontextmenu = document.createAttribute('oncontextmenu');
+    oncontextmenu.value = 'return false';
+    newButton.setAttributeNode(oncontextmenu);
 
     //fill the canvas
     var ctxOfBlock = document.getElementById(names[i]).getContext('2d');
@@ -143,21 +162,30 @@ var paste2 = 0;
 var copiedSelection = [];
 
 function fill() {
-  if (fillStatus == 0 && copyPasteStatus == 0) {
+  if (fillStatus == 0 && copyStatus == 0 && pasteStatus == 0) {
     fillStatus = 1;
     document.getElementById('fill').innerHTML = 'x, y - x, y';
   }
 }
 
-function copyPaste() {
-  if (copyPasteStatus == 0 && fillStatus == 0) {
-    copyPasteStatus = 1;
-    document.getElementById('copyPaste').innerHTML = 'x, y - x, y => x, y';
+function copy() {
+  if (fillStatus == 0 && copyStatus == 0 && pasteStatus == 0) {
+    copyStatus = 1;
+    copiedSelection = [];
+    document.getElementById('copy').innerHTML = 'x, y - x, y';
+  }
+}
+
+function paste() {
+  //copied selection is not empty, ie copy has been run before
+  if (fillStatus == 0 && copyStatus == 0 && copiedSelection.length > 0) {
+    pasteStatus = 1;
+    document.getElementById('paste').innerHTML = 'Paste: x, y';
   }
 }
 
 function mouseDown() {
-  if (fillStatus == 0 && copyPasteStatus == 0) {
+  if (fillStatus == 0 && copyStatus == 0 && pasteStatus == 0) {
     //filling is not happening
     mouseIsDown = true;
     usedButton = event.button;
@@ -175,8 +203,8 @@ function mouseDown() {
     fill1 = Math.floor(mouseX / 20);
     fill2 = Math.floor(mouseY / 20);
     if (usedButton == 2) {
-      ctx.fillStyle = 'white';
-      toOutput = 0;
+      ctx.fillStyle = secondaryBrush;
+      toOutput = colours.indexOf(secondaryBrush);
     } else {
       ctx.fillStyle = currentBrush;
       toOutput = colours.indexOf(currentBrush);
@@ -206,15 +234,15 @@ function mouseDown() {
 
 
 
-  } else if (copyPasteStatus == 1) {
+  } else if (copyStatus == 1) {
     //copy paste, first one clicked, just remember it for now
     var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - yOffset + pageYOffset;
     copy1 = Math.floor(mouseX / 20);
     copy2 = Math.floor(mouseY / 20);
-    copyPasteStatus = 2;
-    document.getElementById('copyPaste').innerHTML = copy1 + ', ' + copy2 + ' - x, y => x, y';
-  } else if (copyPasteStatus == 2) {
+    copyStatus = 2;
+    document.getElementById('copy').innerHTML = copy1 + ', ' + copy2 + ' - x, y';
+  } else if (copyStatus == 2) {
     //copy paste, second one clicked, export all the cells that were clicked to an array; the values stored are the output
     var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - yOffset + pageYOffset;
@@ -227,9 +255,16 @@ function mouseDown() {
         copiedSelection.push(output[(copy2 + i) * maxX + (copy1 + j) + 2]);
       }
     }
-    copyPasteStatus = 3;
-    document.getElementById('copyPaste').innerHTML = copy1 + ', ' + copy2 + ' - ' + copy3 + ', ' + copy4 + ' => x, y';
-  } else if (copyPasteStatus == 3) {
+    copyStatus = 0;
+    document.getElementById('copy').innerHTML = copy1 + ', ' + copy2 + ' - ' + copy3 + ', ' + copy4 + ' (C)';
+
+
+
+
+
+
+
+  } else if (pasteStatus == 1) {
     //writing values everywhere: filling colours and adding to the output
     var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - yOffset + pageYOffset;
@@ -249,10 +284,8 @@ function mouseDown() {
         }
       }
     }
-    //set fill back to 0
-    copyPasteStatus = 0;
-    copiedSelection = [];
-    document.getElementById('copyPaste').innerHTML = 'Copy & Paste (C)';
+    pasteStatus = 0;
+    document.getElementById('paste').innerHTML = 'Paste (V)';
   }
 }
 
@@ -266,15 +299,19 @@ function objectMousedOver() {
     var mouseY = event.clientY - yOffset + pageYOffset;
     var targetX = Math.floor(mouseX / 20);
     var targetY = Math.floor(mouseY / 20);
-    if (usedButton == 2) {
-      ctx.fillStyle = 'white';
-      toOutput = 0;
-    } else {
-      ctx.fillStyle = currentBrush;
-      toOutput = colours.indexOf(currentBrush);
+    //if out of bounds
+    //theoretically could be extended to other mouse events, but since this one is the most common, it should be good enough
+    if (!(targetX > 19 || targetY > 19 || targetX < 0 || targetY < 0)) {
+      if (usedButton == 2) {
+        ctx.fillStyle = secondaryBrush;
+        toOutput = colours.indexOf(secondaryBrush);
+      } else {
+        ctx.fillStyle = currentBrush;
+        toOutput = colours.indexOf(currentBrush);
+      }
+      ctx.fillRect(targetX * 20 + 1, targetY * 20 + 1, 18, 18);
+      output[targetY * maxX + targetX + 2] = toOutput;
     }
-    ctx.fillRect(targetX * 20 + 1, targetY * 20 + 1, 18, 18);
-    output[targetY * maxX + targetX + 2] = toOutput;
   }
 }
 
@@ -284,8 +321,11 @@ function keyPressed(event) {
     fill();
   }
   if (event.keyCode == 67) {
-    //press c to copypaste
-    copyPaste();
+    //press c to copy
+    copy();
+  }
+  if (event.keyCode == 86) {
+    paste();
   }
 }
 

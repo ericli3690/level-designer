@@ -13,10 +13,11 @@
     <canvas oncontextmenu="return false;" width="0px" height="0px" id="canvas"></canvas><br><br>
     <div id="div01">
     </div>
-    <p id="blockInstructions">(Palette) Hover over a colour for the block it represents</p>
+    <p id="blockInstructions">(Palette) Hover over a colour for the block it represents. Click to change brush colour.</p>
     <p id="functionsTitle">Functions:</p>
     <button onclick="fill()" id="fill">Fill (F)</button><p id="fillInstructions">Instructions: Press button, then press top left corner of selection, then press bottom right corner of selection</p>
-    <button onclick="copyPaste()" id="copyPaste">Copy & Paste (C)</button><p id="copyPasteInstructions">Instructions: Press button, then press top left corner of selection, then press bottom right corner of selection, then press top left corner of target</p>
+    <button onclick="copy()" id="copy">Copy (C)</button><p id="copyInstructions">Instructions: Press button, then press top left corner of selection, then press bottom right corner of selection</p>
+    <button onclick="paste()" id="paste">Paste (V)</button><p id="pasteInstructions">Instructions: If something has been copied, press button, then press top left corner of target</p>
     </div>
 
     <div id="div1">
