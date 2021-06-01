@@ -11,13 +11,27 @@ var mouseIsDown = false;
 var usedButton = 0;
 var toOutput = 1;
 var output = [];
-var currentBrush = 'white';
+var currentBrush = 'yellow';
 var secondaryBrush = 'white';
 var fillStatus = 0;
 var copyStatus = 0;
 var pasteStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
+/*
+//loading images
+function loadImage(mySrc, x, y, firstTimeLoading) {
+  var imageToDraw = new Image();
+  imageToDraw.src = mySrc;
+  if (firstTimeLoading == true) {
+    imageToDraw.onload = function() {
+      ctx.drawImage(imageToDraw, x, y);
+    }
+  } else {
+    ctx.drawImage(imageToDraw, x, y);
+  }
+}
+*/
 //creates each block; this allows them to each have their own event listener
 class Block {
   constructor(name) {
@@ -93,6 +107,8 @@ function createBlocks() {
 
 //create immediately
 createBlocks();
+document.getElementById('spawn').style.border = '3px solid black';
+document.getElementById('void').style.border = '3px solid grey';
 
 function createCanvas() {
   if (document.getElementById('loadString').value == "") {
