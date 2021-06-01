@@ -11,49 +11,49 @@ var mouseIsDown = false;
 var usedButton = 0;
 var toOutput = 1;
 var output = [];
-var currentBrush = 'yellow';
-var secondaryBrush = 'white';
+var primaryBrush = './images/spawn.png';
+var secondaryBrush = './images/void.png';
+var fillBrush = '';
 var fillStatus = 0;
 var copyStatus = 0;
 var pasteStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
-/*
 //loading images
-function loadImage(mySrc, x, y, firstTimeLoading) {
+function loadImage(mySrc, x, y, width, height, ctxi, firstTimeLoading) {
   var imageToDraw = new Image();
   imageToDraw.src = mySrc;
   if (firstTimeLoading == true) {
     imageToDraw.onload = function() {
-      ctx.drawImage(imageToDraw, x, y);
+      ctxi.drawImage(imageToDraw, x, y, width, height);
     }
   } else {
-    ctx.drawImage(imageToDraw, x, y);
+    ctxi.drawImage(imageToDraw, x, y, width, height);
   }
 }
-*/
+
 //creates each block; this allows them to each have their own event listener
 class Block {
   constructor(name) {
     this.name = name;
   }
   addListener() {
+    //since "this refers to the html element, we need to save this.name briefly"
+    var nameImportToAvoidThisProblems = this.name;
     document.getElementById(this.name).addEventListener("mouseup", function() {
-      var classes = [];
-      //grab the two classes, and split them into an array, with the first item being the colour
-      classes = this.className.split(" ");
       //set it as the brush!
       if (event.button == 2) {
         //is there a canvas that has a border that matches the current brush? if so, set it to white
-        document.getElementById(names[colours.indexOf(secondaryBrush)]).style.border = '3px solid white';
+        document.getElementById(secondaryBrush).style.border = '3px solid white';
         //set it as right click brush
-        secondaryBrush = classes[0];
-        //"this" refers to the html element
+        secondaryBrush = nameImportToAvoidThisProblems;
+        //set border
         this.style.border = '3px solid grey';
       } else {
-        document.getElementById(names[colours.indexOf(currentBrush)]).style.border = '3px solid white';
+        document.getElementById(primaryBrush).style.border = '3px solid white';
         //set it as left click brush
-        currentBrush = classes[0];
+        primaryBrush = nameImportToAvoidThisProblems;
+        //set border
         this.style.border = '3px solid black';
       }
     })
@@ -63,8 +63,19 @@ class Block {
 //the blocks
 var one, two, three, four, five, six, seven, eight, nine, ten, eleven;
 var blocks = [one, two, three, four, five, six, seven, eight, nine, ten, eleven];
-var names = ['void', 'spawn', 'win', 'overworld_material_dirt', 'overworld_material_grass', 'overworld_background', 'overworld_background_hanging_grass', 'overworld_background_hanging_grass_180', 'overworld_material_dirt_corner', 'overworld_material_dirt_corner_180', 'overworld_water'];
-var colours = ['white', 'yellow', 'black', 'purple', 'green', 'pink', 'red', 'orange', 'cyan', 'blue', 'navy'];
+var images = [
+'./images/void.png',
+'./images/spawn.png',
+'./images/win.png',
+'./images/overworld_material_dirt.png',
+'./images/overworld_material_grass.png',
+'./images/overworld_background.png',
+'./images/overworld_background_hanging_grass.png',
+'./images/overworld_background_hanging_grass_180.png',
+'./images/overworld_material_dirt_corner.png',
+'./images/overworld_material_dirt_corner_180.png',
+'./images/overworld_water.png'
+];
 
 //creates the blocks
 function createBlocks() {
@@ -77,16 +88,17 @@ function createBlocks() {
 
     //give the canvas an id
     var id = document.createAttribute('id');
-    id.value = names[i];
+    id.value = images[i];
     newButton.setAttributeNode(id);
 
-    //give the canvas two classes: one which shows its colour and one that indicates it is a block
+    //give the canvas a class which shows that it is a block and editable as a batch in the css
     var classs = document.createAttribute('class');
-    classs.value = colours[i] + ' block';
+    classs.value = 'block';
     newButton.setAttributeNode(classs);
 
+    //on hover, shows the name of the block
     var title = document.createAttribute('title');
-    title.value = names[i];
+    title.value = images[i];
     newButton.setAttributeNode(title);
 
     //disable the right click menu when it is clicked
@@ -95,20 +107,19 @@ function createBlocks() {
     newButton.setAttributeNode(oncontextmenu);
 
     //fill the canvas
-    var ctxOfBlock = document.getElementById(names[i]).getContext('2d');
-    ctxOfBlock.fillStyle = colours[i];
-    ctxOfBlock.fillRect(0, 0, 300, 200);
+    var ctxOfBlock = document.getElementById(images[i]).getContext('2d');
+    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock, true);
 
     //instance a new block, give it a listener (see above)
-    blocks[i] = new Block(names[i]);
+    blocks[i] = new Block(images[i]);
     blocks[i].addListener();
   }
 }
 
 //create immediately
 createBlocks();
-document.getElementById('spawn').style.border = '3px solid black';
-document.getElementById('void').style.border = '3px solid grey';
+document.getElementById('./images/spawn.png').style.border = '3px solid black';
+document.getElementById('./images/void.png').style.border = '3px solid grey';
 
 function createCanvas() {
   if (document.getElementById('loadString').value == "") {
@@ -146,12 +157,11 @@ function createCanvas() {
         //x, y, width, height
         ctx.strokeRect(j * 20, i * 20, 20, 20);
         if (output[i * maxX + j + 2] != 0) {
-          ctx.fillStyle = colours[parseInt(output[i * maxX + j + 2], 10)];
+          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20 + 1, i * 20 + 1, 18, 18, ctx, false);
           //i * maxx + j + 2 is the current tile of the string we are looking at
           //output[the above] is that tile
           //parseInt(the above, 10) takes the string output and turns it into a number, the 10 is for base 10
-          //colours[the above]  to get the block with that call number
-          ctx.fillRect(j * 20 + 1, i * 20 + 1, 18, 18);
+          //images[the above]  to get the block with that call number
         }
       }
     }
@@ -212,19 +222,12 @@ function mouseDown() {
 
 
   } else if (fillStatus == 1) {
-    //fill, first one clicked, save the first block and set the colour to fill with
+    //fill, first one clicked, save the first block and set the images to fill with
     usedButton = event.button;
     var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - yOffset + pageYOffset;
     fill1 = Math.floor(mouseX / 20);
     fill2 = Math.floor(mouseY / 20);
-    if (usedButton == 2) {
-      ctx.fillStyle = secondaryBrush;
-      toOutput = colours.indexOf(secondaryBrush);
-    } else {
-      ctx.fillStyle = currentBrush;
-      toOutput = colours.indexOf(currentBrush);
-    }
     fillStatus = 2;
     document.getElementById('fill').innerHTML = fill1 + ', ' + fill2 + ' - x, y';
   } else if (fillStatus == 2) {
@@ -238,7 +241,13 @@ function mouseDown() {
     for (var i = 0; i < (fill4 - fill2 + 1); i++) {
       for (var j = 0; j < (fill3 - fill1 + 1); j++) {
         //filling everything, but starting from the initial selection
-        ctx.fillRect((fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18);
+        if (usedButton == 2) {
+          loadImage(secondaryBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx, false);
+          toOutput = images.indexOf(secondaryBrush);
+        } else {
+          loadImage(primaryBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx, false);
+          toOutput = images.indexOf(primaryBrush);
+        }
         output[(fill2 + i) * maxX + (fill1 + j) + 2] = toOutput;
       }
     }
@@ -281,7 +290,7 @@ function mouseDown() {
 
 
   } else if (pasteStatus == 1) {
-    //writing values everywhere: filling colours and adding to the output
+    //writing values everywhere: filling images and adding to the output
     var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - yOffset + pageYOffset;
     paste1 = Math.floor(mouseX / 20);
@@ -294,8 +303,7 @@ function mouseDown() {
         if (!(paste1 + j > maxX - 1 || paste2 + i > maxY - 1)) {
           //current row * amount of columns + current column = current tile
           var amountOfTimesThisVariableHasBeenDeclared = i * (copy3 - copy1 + 1) + j;
-          ctx.fillStyle = colours[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]];
-          ctx.fillRect((paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18);
+          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18, ctx, false);
           output[(paste2 + i) * maxX + (paste1 + j) + 2] = copiedSelection[amountOfTimesThisVariableHasBeenDeclared];
         }
       }
@@ -319,13 +327,12 @@ function objectMousedOver() {
     //theoretically could be extended to other mouse events, but since this one is the most common, it should be good enough
     if (!(targetX > 19 || targetY > 19 || targetX < 0 || targetY < 0)) {
       if (usedButton == 2) {
-        ctx.fillStyle = secondaryBrush;
-        toOutput = colours.indexOf(secondaryBrush);
+        loadImage(secondaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, false);
+        toOutput = images.indexOf(secondaryBrush);
       } else {
-        ctx.fillStyle = currentBrush;
-        toOutput = colours.indexOf(currentBrush);
+        loadImage(primaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, false);
+        toOutput = images.indexOf(primaryBrush);
       }
-      ctx.fillRect(targetX * 20 + 1, targetY * 20 + 1, 18, 18);
       output[targetY * maxX + targetX + 2] = toOutput;
     }
   }
