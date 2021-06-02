@@ -108,7 +108,7 @@ function createBlocks() {
 
     //fill the canvas
     var ctxOfBlock = document.getElementById(images[i]).getContext('2d');
-    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock, true);
+    loadImage(images[i], 0, 0, 300, 150, ctxOfBlock, true);
 
     //instance a new block, give it a listener (see above)
     blocks[i] = new Block(images[i]);
