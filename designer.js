@@ -1,3 +1,32 @@
+/////////////////
+/////////////////
+/////////////////
+
+/*
+BLOCKS
+*/
+
+var one, two, three, four, five, six, seven, eight, nine, ten, eleven;
+var blocks = [one, two, three, four, five, six, seven, eight, nine, ten, eleven];
+
+var images = [
+'./images/void.png',
+'./images/spawn.png',
+'./images/win.png',
+'./images/overworld_material_dirt.png',
+'./images/overworld_material_grass.png',
+'./images/overworld_background.png',
+'./images/overworld_background_hanging_grass.png',
+'./images/overworld_background_hanging_grass_180.png',
+'./images/overworld_material_dirt_corner.png',
+'./images/overworld_material_dirt_corner_reflect.png',
+'./images/overworld_water.png'
+];
+
+//////////////////
+//////////////////
+//////////////////
+
 //simple values for testing, making canvas invisible, saving invisible
 document.getElementById('inputX').value = 20;
 document.getElementById('inputY').value = 20;
@@ -60,23 +89,6 @@ class Block {
   }
 }
 
-//the blocks
-var one, two, three, four, five, six, seven, eight, nine, ten, eleven;
-var blocks = [one, two, three, four, five, six, seven, eight, nine, ten, eleven];
-var images = [
-'./images/void.png',
-'./images/spawn.png',
-'./images/win.png',
-'./images/overworld_material_dirt.png',
-'./images/overworld_material_grass.png',
-'./images/overworld_background.png',
-'./images/overworld_background_hanging_grass.png',
-'./images/overworld_background_hanging_grass_180.png',
-'./images/overworld_material_dirt_corner.png',
-'./images/overworld_material_dirt_corner_180.png',
-'./images/overworld_water.png'
-];
-
 //creates the blocks
 function createBlocks() {
   //for each block, with the quantity indicated by "blocks"
@@ -108,6 +120,7 @@ function createBlocks() {
 
     //fill the canvas
     var ctxOfBlock = document.getElementById(images[i]).getContext('2d');
+    //width, height
     loadImage(images[i], 0, 0, 300, 150, ctxOfBlock, true);
 
     //instance a new block, give it a listener (see above)
@@ -127,17 +140,11 @@ function createCanvas() {
     maxY = document.getElementById('inputY').value;
     document.getElementById('canvas').width = maxX * 20;
     document.getElementById('canvas').height = maxY * 20;
-    ctx.strokeStyle = 'gainsboro';
+    //gainsboro as gridlines
     output.push(maxX);
     output.push(maxY);
-    for (var i = 0; i < maxY; i++) {
-      //moving down a row
-      for (var j = 0; j < maxX; j++) {
-        //moving over a column
-        //x, y, width, height
-        ctx.strokeRect(j * 20, i * 20, 20, 20);
-        output.push(0);
-      }
+    for (var i = 0; i < maxX * maxY; i++) {
+      output.push(0);
     }
     output.push('|END OF STRING|');
   } else {
@@ -148,16 +155,12 @@ function createCanvas() {
     maxY = output[1];
     document.getElementById('canvas').width = maxX * 20;
     document.getElementById('canvas').height = maxY * 20;
-    ctx.strokeStyle = 'gainsboro';
-
     for (var i = 0; i < maxY; i++) {
       //moving down a row
       for (var j = 0; j < maxX; j++) {
         //moving over a column
-        //x, y, width, height
-        ctx.strokeRect(j * 20, i * 20, 20, 20);
         if (output[i * maxX + j + 2] != 0) {
-          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20 + 1, i * 20 + 1, 18, 18, ctx, false);
+          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20, i * 20, 20, 20, ctx);
           //i * maxx + j + 2 is the current tile of the string we are looking at
           //output[the above] is that tile
           //parseInt(the above, 10) takes the string output and turns it into a number, the 10 is for base 10
@@ -238,7 +241,6 @@ function mouseDown() {
     document.getElementById('fill').innerHTML = fill1 + ', ' + fill2 + ' - x, y';
   } else if (fillStatus == 2) {
     //fill, second one clicked, save it
-    usedButton = event.button;
     var mouseX = event.clientX - 10 + pageXOffset;
     var mouseY = event.clientY - yOffset + pageYOffset;
     fill3 = Math.floor(mouseX / 20);
@@ -247,7 +249,7 @@ function mouseDown() {
     for (var i = 0; i < (fill4 - fill2 + 1); i++) {
       for (var j = 0; j < (fill3 - fill1 + 1); j++) {
         //filling everything, but starting from the initial selection
-        loadImage(fillBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx, true);
+        loadImage(fillBrush, (fill1 + j) * 20, (fill2 + i) * 20, 20, 20, ctx, true);
         output[(fill2 + i) * maxX + (fill1 + j) + 2] = images.indexOf(fillBrush);
       }
     }
@@ -303,7 +305,7 @@ function mouseDown() {
         if (!(paste1 + j > maxX - 1 || paste2 + i > maxY - 1)) {
           //current row * amount of columns + current column = current tile
           var amountOfTimesThisVariableHasBeenDeclared = i * (copy3 - copy1 + 1) + j;
-          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18, ctx, true);
+          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20, (paste2 + i) * 20, 20, 20, ctx, true);
           output[(paste2 + i) * maxX + (paste1 + j) + 2] = copiedSelection[amountOfTimesThisVariableHasBeenDeclared];
         }
       }
@@ -327,10 +329,10 @@ function objectMousedOver() {
     //theoretically could be extended to other mouse events, but since this one is the most common, it should be good enough
     if (!(targetX >= maxX || targetY >= maxY || targetX < 0 || targetY < 0)) {
       if (usedButton == 2) {
-        loadImage(secondaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, true);
+        loadImage(secondaryBrush, targetX * 20, targetY * 20, 20, 20, ctx, true);
         toOutput = images.indexOf(secondaryBrush);
       } else {
-        loadImage(primaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, true);
+        loadImage(primaryBrush, targetX * 20, targetY * 20, 20, 20, ctx, true);
         toOutput = images.indexOf(primaryBrush);
       }
       output[targetY * maxX + targetX + 2] = toOutput;
