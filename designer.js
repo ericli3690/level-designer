@@ -17,13 +17,42 @@ var fillBrush = '';
 var fillStatus = 0;
 var copyStatus = 0;
 var pasteStatus = 0;
+var complete = 0;
+var reloaded = false;
 var ctx = document.getElementById('canvas').getContext('2d');
 
 //loading images
-function loadImage(mySrc, x, y, width, height, ctxi) {
+function loadImage(mySrc, x, y, width, height, ctxi, firstTimeLoading) {
   var imageToDraw = new Image();
   imageToDraw.src = mySrc;
-  imageToDraw.onload = function() {
+  if (firstTimeLoading == true) {
+    console.log('before' + mySrc + Date.now())
+
+    var loaded = false;
+    function load() {
+      imageToDraw.onload = function() {
+        ctxi.drawImage(imageToDraw, x, y, width, height);
+        console.log('loaded ' + mySrc + Date.now());
+        function trueNow() {
+          loaded = true;
+          complete += 1;
+          console.log(complete)
+        }
+        setTimeout(trueNow, 20);
+      }
+    }
+    load();
+    function checkLoaded() {
+      if (loaded == true) {
+        console.log('after' + mySrc + Date.now())
+      } else {
+        setTimeout(checkLoaded, 20);
+        console.log('redo' + mySrc + Date.now())
+      }
+    }
+    checkLoaded();
+
+  } else {
     ctxi.drawImage(imageToDraw, x, y, width, height);
   }
 }
@@ -74,6 +103,24 @@ var images = [
 ];
 
 //creates the blocks
+//used to quickly load all blocks
+function reloadImages() {
+  complete = 0;
+  for (var i = 0; i < images.length; i++) {
+    var ctxOfBlock = document.getElementById(images[i]).getContext('2d');
+    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock, true);
+  }
+  function check() {
+    if (complete != blocks.length) {
+      setTimeout(check, 20);
+    } else {
+      console.log('out')
+      reloaded = true;
+    }
+  }
+  check();
+}
+
 function createBlocks() {
   //for each block, with the quantity indicated by "blocks"
   for (var i = 0; i < blocks.length; i++) {
@@ -104,7 +151,7 @@ function createBlocks() {
 
     //fill the canvas
     var ctxOfBlock = document.getElementById(images[i]).getContext('2d');
-    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock);
+    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock, true);
 
     //instance a new block, give it a listener (see above)
     blocks[i] = new Block(images[i]);
@@ -145,7 +192,6 @@ function createCanvas() {
     document.getElementById('canvas').width = maxX * 20;
     document.getElementById('canvas').height = maxY * 20;
     ctx.strokeStyle = 'gainsboro';
-
     for (var i = 0; i < maxY; i++) {
       //moving down a row
       for (var j = 0; j < maxX; j++) {
@@ -153,7 +199,7 @@ function createCanvas() {
         //x, y, width, height
         ctx.strokeRect(j * 20, i * 20, 20, 20);
         if (output[i * maxX + j + 2] != 0) {
-          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20 + 1, i * 20 + 1, 18, 18, ctx);
+          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20 + 1, i * 20 + 1, 18, 18, ctx, false);
           //i * maxx + j + 2 is the current tile of the string we are looking at
           //output[the above] is that tile
           //parseInt(the above, 10) takes the string output and turns it into a number, the 10 is for base 10
@@ -239,17 +285,29 @@ function mouseDown() {
     var mouseY = event.clientY - yOffset + pageYOffset;
     fill3 = Math.floor(mouseX / 20);
     fill4 = Math.floor(mouseY / 20);
-    //the math and actual filling
-    for (var i = 0; i < (fill4 - fill2 + 1); i++) {
-      for (var j = 0; j < (fill3 - fill1 + 1); j++) {
-        //filling everything, but starting from the initial selection
-        loadImage(fillBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx);
-        output[(fill2 + i) * maxX + (fill1 + j) + 2] = images.indexOf(fillBrush);
+    reloaded = false;
+    reloadImages();
+    function checkReloaded() {
+      if (reloaded == false) {
+        setTimeout(checkReloaded, 20);
+      } else {
+        console.log('cont' + Date.now())
+        //the math and actual filling
+        for (var i = 0; i < (fill4 - fill2 + 1); i++) {
+          for (var j = 0; j < (fill3 - fill1 + 1); j++) {
+            //filling everything, but starting from the initial selection
+            loadImage(fillBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx, false);
+            output[(fill2 + i) * maxX + (fill1 + j) + 2] = images.indexOf(fillBrush);
+          }
+        }
+        //set fill back to 0
+        fillStatus = 0;
+        document.getElementById('fill').innerHTML = 'Fill (F)';
       }
     }
-    //set fill back to 0
-    fillStatus = 0;
-    document.getElementById('fill').innerHTML = 'Fill (F)';
+    checkReloaded();
+
+
 
 
 
@@ -299,7 +357,7 @@ function mouseDown() {
         if (!(paste1 + j > maxX - 1 || paste2 + i > maxY - 1)) {
           //current row * amount of columns + current column = current tile
           var amountOfTimesThisVariableHasBeenDeclared = i * (copy3 - copy1 + 1) + j;
-          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18, ctx);
+          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18, ctx, false);
           output[(paste2 + i) * maxX + (paste1 + j) + 2] = copiedSelection[amountOfTimesThisVariableHasBeenDeclared];
         }
       }
@@ -323,10 +381,11 @@ function objectMousedOver() {
     //theoretically could be extended to other mouse events, but since this one is the most common, it should be good enough
     if (!(targetX >= maxX || targetY >= maxY || targetX < 0 || targetY < 0)) {
       if (usedButton == 2) {
-        loadImage(secondaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx);
+        //should have been loaded before, but reload them just in case
+        loadImage(secondaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, true);
         toOutput = images.indexOf(secondaryBrush);
       } else {
-        loadImage(primaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx);
+        loadImage(primaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, true);
         toOutput = images.indexOf(primaryBrush);
       }
       output[targetY * maxX + targetX + 2] = toOutput;
