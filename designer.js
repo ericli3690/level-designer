@@ -20,14 +20,10 @@ var pasteStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
 //loading images
-function loadImage(mySrc, x, y, width, height, ctxi, firstTimeLoading) {
+function loadImage(mySrc, x, y, width, height, ctxi) {
   var imageToDraw = new Image();
   imageToDraw.src = mySrc;
-  if (firstTimeLoading == true) {
-    imageToDraw.onload = function() {
-      ctxi.drawImage(imageToDraw, x, y, width, height);
-    }
-  } else {
+  imageToDraw.onload = function() {
     ctxi.drawImage(imageToDraw, x, y, width, height);
   }
 }
@@ -108,7 +104,7 @@ function createBlocks() {
 
     //fill the canvas
     var ctxOfBlock = document.getElementById(images[i]).getContext('2d');
-    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock, true);
+    loadImage(images[i], 0, 0, 200, 200, ctxOfBlock);
 
     //instance a new block, give it a listener (see above)
     blocks[i] = new Block(images[i]);
@@ -157,7 +153,7 @@ function createCanvas() {
         //x, y, width, height
         ctx.strokeRect(j * 20, i * 20, 20, 20);
         if (output[i * maxX + j + 2] != 0) {
-          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20 + 1, i * 20 + 1, 18, 18, ctx, false);
+          loadImage(images[parseInt(output[i * maxX + j + 2], 10)], j * 20 + 1, i * 20 + 1, 18, 18, ctx);
           //i * maxx + j + 2 is the current tile of the string we are looking at
           //output[the above] is that tile
           //parseInt(the above, 10) takes the string output and turns it into a number, the 10 is for base 10
@@ -190,6 +186,7 @@ var copiedSelection = [];
 function fill() {
   if (fillStatus == 0 && copyStatus == 0 && pasteStatus == 0) {
     fillStatus = 1;
+    fillBrush = '';
     document.getElementById('fill').innerHTML = 'x, y - x, y';
   }
 }
@@ -228,6 +225,11 @@ function mouseDown() {
     var mouseY = event.clientY - yOffset + pageYOffset;
     fill1 = Math.floor(mouseX / 20);
     fill2 = Math.floor(mouseY / 20);
+    if (usedButton == 2) {
+      fillBrush = secondaryBrush;
+    } else {
+      fillBrush = primaryBrush;
+    }
     fillStatus = 2;
     document.getElementById('fill').innerHTML = fill1 + ', ' + fill2 + ' - x, y';
   } else if (fillStatus == 2) {
@@ -241,14 +243,8 @@ function mouseDown() {
     for (var i = 0; i < (fill4 - fill2 + 1); i++) {
       for (var j = 0; j < (fill3 - fill1 + 1); j++) {
         //filling everything, but starting from the initial selection
-        if (usedButton == 2) {
-          loadImage(secondaryBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx, false);
-          toOutput = images.indexOf(secondaryBrush);
-        } else {
-          loadImage(primaryBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx, false);
-          toOutput = images.indexOf(primaryBrush);
-        }
-        output[(fill2 + i) * maxX + (fill1 + j) + 2] = toOutput;
+        loadImage(fillBrush, (fill1 + j) * 20 + 1, (fill2 + i) * 20 + 1, 18, 18, ctx);
+        output[(fill2 + i) * maxX + (fill1 + j) + 2] = images.indexOf(fillBrush);
       }
     }
     //set fill back to 0
@@ -303,7 +299,7 @@ function mouseDown() {
         if (!(paste1 + j > maxX - 1 || paste2 + i > maxY - 1)) {
           //current row * amount of columns + current column = current tile
           var amountOfTimesThisVariableHasBeenDeclared = i * (copy3 - copy1 + 1) + j;
-          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18, ctx, false);
+          loadImage(images[copiedSelection[amountOfTimesThisVariableHasBeenDeclared]], (paste1 + j) * 20 + 1, (paste2 + i) * 20 + 1, 18, 18, ctx);
           output[(paste2 + i) * maxX + (paste1 + j) + 2] = copiedSelection[amountOfTimesThisVariableHasBeenDeclared];
         }
       }
@@ -325,12 +321,12 @@ function objectMousedOver() {
     var targetY = Math.floor(mouseY / 20);
     //if out of bounds
     //theoretically could be extended to other mouse events, but since this one is the most common, it should be good enough
-    if (!(targetX > 19 || targetY > 19 || targetX < 0 || targetY < 0)) {
+    if (!(targetX >= maxX || targetY >= maxY || targetX < 0 || targetY < 0)) {
       if (usedButton == 2) {
-        loadImage(secondaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, false);
+        loadImage(secondaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx);
         toOutput = images.indexOf(secondaryBrush);
       } else {
-        loadImage(primaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx, false);
+        loadImage(primaryBrush, targetX * 20 + 1, targetY * 20 + 1, 18, 18, ctx);
         toOutput = images.indexOf(primaryBrush);
       }
       output[targetY * maxX + targetX + 2] = toOutput;
