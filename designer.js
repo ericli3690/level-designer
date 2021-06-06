@@ -2,12 +2,9 @@
 /////////////////
 /////////////////
 
-/*
-BLOCKS
-*/
+// BLOCKS //
 
-var one, two, three, four, five, six, seven, eight, nine, ten, eleven;
-var blocks = [one, two, three, four, five, six, seven, eight, nine, ten, eleven];
+// BELOW, PLEASE INSERT THE ADDRESS  OF THE IMAGES IN THE FOLDER "images" WITH THE SYNTAX: /// './images/YOUR_FILENAME_HERE.png', /// //
 
 var images = [
 './images/void.png',
@@ -27,13 +24,15 @@ var images = [
 //////////////////
 //////////////////
 
+// THE CODE BELOW IS ALL THE FUNCTIONAL CODE USED BY THE PROGRAM, EDITING SHOULD NOT BE NECESSARY //
+// PLEASE REACH OUT TO THE DEVELOPERS FOR QUERIES //
+
 //simple values for testing, making canvas invisible, saving invisible
 document.getElementById('inputX').value = 20;
 document.getElementById('inputY').value = 20;
 document.getElementById('div0').style.display = 'none';
 document.getElementById('div3').style.display = 'none';
 
-var yOffset = 85; //the amount of pixels between the canvas and the top
 var maxX = 0;
 var maxY = 0;
 var mouseIsDown = false;
@@ -48,6 +47,15 @@ var copyStatus = 0;
 var pasteStatus = 0;
 var ctx = document.getElementById('canvas').getContext('2d');
 
+//procedurally generating all blocks
+//array of all block objects
+var blocks = [];
+//images.length is the user specified amount of blocks
+for (var i = 0; i < images.length; i++) {
+  //window is a global value that can procedurally create variables
+  blocks.push(window['block' + i]);
+}
+
 //loading images
 function loadImage(mySrc, x, y, width, height, ctxi, firstTimeLoading) {
   var imageToDraw = new Image();
@@ -58,6 +66,16 @@ function loadImage(mySrc, x, y, width, height, ctxi, firstTimeLoading) {
     }
   } else {
     ctxi.drawImage(imageToDraw, x, y, width, height);
+  }
+}
+
+//get the offset of any object:
+function getOffset(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    //the 3 is the border
+    left: rect.left + 3,
+    top: rect.top + 3
   }
 }
 
@@ -228,8 +246,8 @@ function mouseDown() {
   } else if (fillStatus == 1) {
     //fill, first one clicked, save the first block and set the images to fill with
     usedButton = event.button;
-    var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - yOffset + pageYOffset;
+    var mouseX = event.clientX - getOffset(document.getElementById('canvas')).left;
+    var mouseY = event.clientY - getOffset(document.getElementById('canvas')).top;
     fill1 = Math.floor(mouseX / 20);
     fill2 = Math.floor(mouseY / 20);
     if (usedButton == 2) {
@@ -241,8 +259,8 @@ function mouseDown() {
     document.getElementById('fill').innerHTML = fill1 + ', ' + fill2 + ' - x, y';
   } else if (fillStatus == 2) {
     //fill, second one clicked, save it
-    var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - yOffset + pageYOffset;
+    var mouseX = event.clientX - getOffset(document.getElementById('canvas')).left;
+    var mouseY = event.clientY - getOffset(document.getElementById('canvas')).top;
     fill3 = Math.floor(mouseX / 20);
     fill4 = Math.floor(mouseY / 20);
     //the math and actual filling
@@ -263,16 +281,16 @@ function mouseDown() {
 
   } else if (copyStatus == 1) {
     //copy paste, first one clicked, just remember it for now
-    var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - yOffset + pageYOffset;
+    var mouseX = event.clientX - getOffset(document.getElementById('canvas')).left;
+    var mouseY = event.clientY - getOffset(document.getElementById('canvas')).top;
     copy1 = Math.floor(mouseX / 20);
     copy2 = Math.floor(mouseY / 20);
     copyStatus = 2;
     document.getElementById('copy').innerHTML = copy1 + ', ' + copy2 + ' - x, y';
   } else if (copyStatus == 2) {
     //copy paste, second one clicked, export all the cells that were clicked to an array; the values stored are the output
-    var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - yOffset + pageYOffset;
+    var mouseX = event.clientX - getOffset(document.getElementById('canvas')).left;
+    var mouseY = event.clientY - getOffset(document.getElementById('canvas')).top;
     copy3 = Math.floor(mouseX / 20);
     copy4 = Math.floor(mouseY / 20);
     //grabbing the values, see the fill code above for an explanation as they are similar
@@ -293,8 +311,8 @@ function mouseDown() {
 
   } else if (pasteStatus == 1) {
     //writing values everywhere: filling images and adding to the output
-    var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - yOffset + pageYOffset;
+    var mouseX = event.clientX - getOffset(document.getElementById('canvas')).left;
+    var mouseY = event.clientY - getOffset(document.getElementById('canvas')).top;
     paste1 = Math.floor(mouseX / 20);
     paste2 = Math.floor(mouseY / 20);
     //the math and actual filling
@@ -321,8 +339,8 @@ function mouseUp() {
 
 function objectMousedOver() {
   if (mouseIsDown == true) {
-    var mouseX = event.clientX - 10 + pageXOffset;
-    var mouseY = event.clientY - yOffset + pageYOffset;
+    var mouseX = event.clientX - getOffset(document.getElementById('canvas')).left;
+    var mouseY = event.clientY - getOffset(document.getElementById('canvas')).top;
     var targetX = Math.floor(mouseX / 20);
     var targetY = Math.floor(mouseY / 20);
     //if out of bounds
